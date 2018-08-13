@@ -6,6 +6,7 @@ import json
 import re
 import sys
 import time
+import subprocess
 
 from overpy import exception
 from overpy.__about__ import (
@@ -18,6 +19,9 @@ PY3 = sys.version_info[0] == 3
 
 XML_PARSER_DOM = 1
 XML_PARSER_SAX = 2
+
+EXEC_DIR='/home/drorex/osm/osm-3s_v0.7.54/bin'
+DB_DIR='/home/drorex/osm/osm-3s_v0.7.54/db'
 
 # Try to convert some common attributes
 # http://wiki.openstreetmap.org/wiki/Elements#Common_attributes
@@ -120,6 +124,11 @@ class Overpass(object):
         """
         if not isinstance(query, bytes):
             query = query.encode("utf-8")
+
+        p = subprocess.Popen("%s/osm3s_query --db-dir=%s" % (EXEC_DIR, DB_DIR), shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate(input=query+"\n")
+        print("'%s'"%err.strip())
+        return self.parse_xml(out)
 
         retry_num = 0
         retry_exceptions = []
